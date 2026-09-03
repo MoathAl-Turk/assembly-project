@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retro Snake Game in 8086 Assembly</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <button id="theme-toggle">🌙 Switch to Dark Mode</button>
+
+    <h1>Retro Snake in 8086 Assembly</h1>
+    <p>A fully playable, classic Snake game developed from scratch using x86 Assembly language and running on the EMU8086 emulator.</p>
+
+    <img src="snake-gameplay.gif" alt="Animated gameplay of the Retro Snake Game" class="project-image">
+
+    <h2>🎮 Project Overview</h2>
+    <p>Building this game required direct interaction with the system's hardware. Instead of relying on high-level game engines, I utilized low-level BIOS and DOS interrupts to control the screen, capture keystrokes, and manage the game loop.</p>
+    <ul>
+        <li><strong>Graphics & UI:</strong> Utilized BIOS Interrupt <code>10h</code> to clear the screen, draw the game borders manually using ASCII characters, and position the cursor.</li>
+        <li><strong>Game Logic:</strong> Implemented dynamic memory arrays to track the snake's growing body coordinates (X and Y positions).</li>
+        <li><strong>User Input:</strong> Used BIOS Interrupt <code>16h</code> for asynchronous keyboard polling to change the snake's direction seamlessly without pausing the game loop.</li>
+    </ul>
+
+    <h2>🛠️ Featured Assembly Code</h2>
+    
+    <h3>1. Asynchronous Keystroke Polling</h3>
+    <p>To keep the snake moving constantly, the game checks the Zero Flag to see if a key was pressed. If not, it skips the input phase and continues the game loop.</p>
+    <div class="code-block">
+<pre>
+; Check for user input using BIOS Int 16h
+mov ah, 01h        ; 01h checks the keyboard buffer
+int 16h
+jz move            ; If no key was pressed (Zero Flag = 1), keep moving
+
+mov ah, 00h        ; 00h retrieves the actual keystroke
+int 16h
+cmp al, 'a'        ; Check for 'A' (Left)
+je left
+cmp al, 's'        ; Check for 'S' (Right)
+je right
+</pre>
+    </div>
+
+    <h3>2. Pseudo-Random Food Generation</h3>
+    <p>Because 8086 Assembly lacks built-in random number generators, I engineered a deterministic workaround using coordinate arrays to spawn food dynamically across the map.</p>
+    <div class="code-block">
+<pre>
+generate_food:
+    mov di, fdindx             ; Load the current array index
+    mov al, fdlistcol[di]      ; Fetch predefined X coordinate
+    mov fdc, al                
+    mov al, fdlistrow[di]      ; Fetch predefined Y coordinate
+    mov fdr, al                
+    
+    inc fdindx                 ; Move to the next index for next time
+    cmp fdindx, 5              ; If we reach the end of the array (5 items)
+    jne done_gen
+    mov fdindx, 0              ; Reset index back to 0
+done_gen:
+    ret
+</pre>
+    </div>
+
+    <a href="https://moathal-turk.github.io" class="back-button">← Back to Main Portfolio</a>
+
+    <script src="script.js"></script>
+
+</body>
+</html>
